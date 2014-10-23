@@ -1,7 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct 22 15:59:41 2014
-"""
+'''
+This script scrapes the bloomberg list of public companies worldwide, stores them in a list
+of dictionaries, converts the dictonary to a pandas dataframe and then exports it to a csv
+'''
 
 import requests
 import bs4
