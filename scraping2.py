@@ -6,6 +6,9 @@ regular http requests.
 The get around this, a firefox browser is opened and passed the url of the page to be scraped.
 At this point, Incapsula does not see 'python' but rather 'firefox' and the required element is extracted
 by xpath.
+
+The side-effect is that every page must be loaded in the browser before it
+can be hooked into, which increases the length of time the script runs for.
 """
 
 from selenium import webdriver
