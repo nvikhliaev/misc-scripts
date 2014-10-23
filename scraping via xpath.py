@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Oct 22 18:31:22 2014
-
-@author: Nikita
-"""
-
 from lxml import html
 import requests
 
