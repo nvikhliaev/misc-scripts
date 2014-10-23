@@ -1,7 +1,7 @@
 """
 A simple implementation of the selenium library (https://pypi.python.org/pypi/selenium).
 The site being scraped (myanimelist.net) uses a platform called Incapsula which prevents
-regular http requests.
+regular http requests. 
 
 The get around this, a firefox browser is opened and passed the url of the page to be scraped.
 At this point, Incapsula does not see 'python' but rather 'firefox' and the required element is extracted
