@@ -1,8 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Oct 22 13:47:53 2014
-
-@author: Nikita
+Uses the giantbomb api to print out a list of character names
 """
 import json
 import requests
