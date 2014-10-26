@@ -6,6 +6,7 @@ character IDs, as recorded by the giantbomb database.
 Example:
 similarity_index(177,370)
 """
+
 import json
 import requests
 
@@ -15,24 +16,20 @@ url2 = "/?api_key=ce6972cdd7d9f713817345a0256f6bd645629481&format=json"
 class Character:
     def __init__(self, ID):
         self.ID = ID
+        self.data = json.loads(requests.get(url+str(self.ID)+url2).text)['results']
     
     def name(self):
-        data = requests.get(url+str(self.ID)+url2).text
-        data = json.loads(data)
-        if not data['results']:
+        if not self.data:
             return "[Character not found]"
         else:
-            return data['results']['name']
+            return self.data['name']
     
     def concepts(self):
         concepts_list=[]
-        data = requests.get(url+str(self.ID)+url2).text
-        data = json.loads(data)
-        if not data['results']:
+        if not self.data:
             return concepts_list
         else:
-            y= data['results']['concepts']
-            for concept in y:
+            for concept in self.data['concepts']:
                 concepts_list.append(concept['name'])
             return concepts_list
             
