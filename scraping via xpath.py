@@ -1,12 +1,3 @@
-# graph is in adjacent list representation
-
-graph = {'A': ['B', 'C'],
-             'B': ['C', 'D'],
-             'C': ['D'],
-             'D': ['C'],
-             'E': ['F'],
-             'F': ['C']}
-
 import json
 import requests
 
@@ -43,7 +34,6 @@ class Character:
             return friends_list
     
     def friendIDs(self):
-        print "making a call"
         friends_list=[]
         if not self.data:
             return friends_list
@@ -71,7 +61,6 @@ def bfs(graph, start, end):
             new_path.append(adjacent)
             queue.append(new_path)
 
-
 def build_graph(charID, adict, visited):
     visited.append(charID)
     adict[charID] = Character(charID).friendIDs()
@@ -79,9 +68,3 @@ def build_graph(charID, adict, visited):
         if friendID not in visited:
             build_graph(friendID, adict, visited)
     return adict
-
-def summer(step, track, lst):
-    if track<10:
-        lst.append(1)
-        summer(step,track+step,lst)
-    return lst
