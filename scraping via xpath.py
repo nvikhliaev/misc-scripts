@@ -1,14 +1,3 @@
-from lxml import html
-import requests
-
-index_url = "http://investing.businessweek.com/research/common/symbollookup/symbollookup.asp?letterIn=A&firstrow=180"
-
-
-page = requests.get(index_url)
-tree = html.fromstring(page.text)
-
-names = tree.xpath('//*[@id="columnLeft"]/table/tbody/tr[1]/td[1]/a')
-
 # graph is in adjacent list representation
 
 graph = {'A': ['B', 'C'],
@@ -54,6 +43,7 @@ class Character:
             return friends_list
     
     def friendIDs(self):
+        print "making a call"
         friends_list=[]
         if not self.data:
             return friends_list
@@ -61,73 +51,6 @@ class Character:
             for friend in self.data['friends']:
                 friends_list.append(friend['id'])
             return friends_list 
-
-
-class graphs:
-    def __init__(self):
-        pass
-    def add(self,obj):
-        adict={}
-        adict[str(obj.ID)]= [str(obj.ID)+'friends', str(obj.ID)+'concepts']
-        return adict
-
-class Graph(object):
-
-    def __init__(self, graph_dict={}):
-        """ initializes a graph object """
-        self.__graph_dict = graph_dict
-
-    def vertices(self):
-        """ returns the vertices of a graph """
-        return list(self.__graph_dict.keys())
-
-    def edges(self):
-        """ returns the edges of a graph """
-        return self.__generate_edges()
-
-    def add_vertex(self, vertex):
-        """ If the vertex "vertex" is not in 
-            self.__graph_dict, a key "vertex" with an empty
-            list as a value is added to the dictionary. 
-            Otherwise nothing has to be done. 
-        """
-        if vertex not in self.__graph_dict:
-            self.__graph_dict[vertex] = []
-
-    def add_edge(self, edge):
-        """ assumes that edge is of type set, tuple or list; 
-            between two vertices can be multiple edges! 
-        """
-        edge = set(edge)
-        (vertex1, vertex2) = tuple(edge)
-        if vertex1 in self.__graph_dict:
-            self.__graph_dict[vertex1].append(vertex2)
-        else:
-            self.__graph_dict[vertex1] = [vertex2]
-
-    def __generate_edges(self):
-        """ A static method generating the edges of the 
-            graph "graph". Edges are represented as sets 
-            with one (a loop back to the vertex) or two 
-            vertices 
-        """
-        edges = []
-        for vertex in self.__graph_dict:
-            for neighbour in self.__graph_dict[vertex]:
-                if {neighbour, vertex} not in edges:
-                    edges.append({vertex, neighbour})
-        return edges
-
-    def __str__(self):
-        res = "vertices: "
-        for k in self.__graph_dict:
-            res += str(k) + " "
-        res += "\nedges: "
-        for edge in self.__generate_edges():
-            res += str(edge) + " "
-        return res
-
-
 
 def bfs(graph, start, end):
     # maintain a queue of paths
@@ -148,14 +71,17 @@ def bfs(graph, start, end):
             new_path.append(adjacent)
             queue.append(new_path)
 
-adict={}
-visited=[]
-def build_graph(charID):
-    visited.append(charID)
-    for ID in Character(charID).friendIDs():
-        adict[ID]=Character(ID).friendIDs()
 
-    for ID in adict.keys():
-        if ID not in visited:
-            build_graph(ID)
-    return None
+def build_graph(charID, adict, visited):
+    visited.append(charID)
+    adict[charID] = Character(charID).friendIDs()
+    for friendID in adict[charID]:
+        if friendID not in visited:
+            build_graph(friendID, adict, visited)
+    return adict
+
+def summer(step, track, lst):
+    if track<10:
+        lst.append(1)
+        summer(step,track+step,lst)
+    return lst
