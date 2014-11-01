@@ -42,6 +42,7 @@ class Character:
                 friends_list.append(friend['id'])
             return friends_list 
 
+# The bfs function code is attributed to qiao @stackexchange
 def bfs(graph, start, end):
     # maintain a queue of paths
     queue = []
