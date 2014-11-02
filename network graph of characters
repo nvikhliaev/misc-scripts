@@ -1,13 +1,14 @@
-import json
 import requests
 
 url= "http://www.giantbomb.com/api/character/3005-"
 url2 = "/?api_key=ce6972cdd7d9f713817345a0256f6bd645629481&format=json"
 
+url3 = "http://www.giantbomb.com/api/concept/3015-"
+
 class Character:
     def __init__(self, ID):
         self.ID = ID
-        self.data = json.loads(requests.get(url+str(self.ID)+url2).text)['results']
+        self.data = requests.get(url+str(self.ID)+url2).json()['results']
     
     def name(self):
         if not self.data:
@@ -23,6 +24,15 @@ class Character:
             for concept in self.data['concepts']:
                 concepts_list.append(concept['name'])
             return concepts_list
+    
+    def conceptIDs(self):
+        conceptIDs_list=[]
+        if not self.data:
+            return conceptIDs_list
+        else:
+            for concept in self.data['concepts']:
+                conceptIDs_list.append(concept['id'])
+            return conceptIDs_list
     
     def friends(self):
         friends_list=[]
@@ -40,7 +50,36 @@ class Character:
         else:
             for friend in self.data['friends']:
                 friends_list.append(friend['id'])
-            return friends_list 
+            return friends_list
+
+class Concept:
+    def __init__(self, ID):
+        self.ID = ID
+        self.data = requests.get(url3+str(self.ID)+url2).json()['results']
+    
+    def name(self):
+        if not self.data:
+            return "[Concept not found]"
+        else:
+            return self.data['name']
+    
+    def characters(self):
+        characters_list=[]
+        if not self.data:
+            return characters_list
+        else:
+            for character in self.data['characters']:
+                characters_list.append(character['name'])
+            return characters_list
+            
+    def characterIDs(self):
+        characterIDs_list=[]
+        if not self.data:
+            return characterIDs_list
+        else:
+            for character in self.data['characters']:
+                characterIDs_list.append(character['id'])
+            return characterIDs_list
 
 # The bfs function code is attributed to qiao @stackexchange
 def bfs(graph, start, end):
@@ -63,9 +102,24 @@ def bfs(graph, start, end):
             queue.append(new_path)
 
 def build_graph(charID, adict, visited):
+    charac = Character(charID)
     visited.append(charID)
-    adict[charID] = Character(charID).friendIDs()
-    for friendID in adict[charID]:
+    adict[charac.name()] = charac.friends()
+    for friendID in charac.friendIDs():
         if friendID not in visited:
             build_graph(friendID, adict, visited)
     return adict
+
+'''
+def build_graph_concepts(charID, adict, visited):
+    visited.append(charID)
+    adict[charID] = Character(charID).conceptIDs()
+    for conceptID in adict[charID]:
+        if conceptID not in visited:
+            adict[conceptID]= Concept(conceptID).characterIDs()
+            visited.append(conceptID)
+            for friendID in adict[conceptID]:  
+                if friendID not in visited:
+                    build_graph_concepts(friendID, adict, visited)
+    return adict
+'''
