@@ -1,8 +1,13 @@
 import requests
+import sys
+from py2neo import neo4j,node, rel
+
+
+graph_db = neo4j.GraphDatabaseService("http://localhost:7474/db/data/")
+
 
 url= "http://www.giantbomb.com/api/character/3005-"
 url2 = "/?api_key=ce6972cdd7d9f713817345a0256f6bd645629481&format=json"
-
 url3 = "http://www.giantbomb.com/api/concept/3015-"
 
 class Character:
@@ -110,6 +115,15 @@ def build_graph(charID, adict, visited):
             build_graph(friendID, adict, visited)
     return adict
 
+def build_graph_neo(charID, adict, visited):
+    charac = Character(charID)
+    visited.append(charID)
+    graph_db.create(node(name=charac.name()))
+    for friendID in charac.friendIDs():
+        if friendID not in visited:
+            build_graph_neo(friendID, adict, visited)
+    return None
+    
 '''
 def build_graph_concepts(charID, adict, visited):
     visited.append(charID)
