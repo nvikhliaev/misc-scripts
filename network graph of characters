@@ -115,14 +115,20 @@ def build_graph(charID, adict, visited):
             build_graph(friendID, adict, visited)
     return adict
 
-def build_graph_neo(charID, adict, visited):
+    
+def build_graph_neo3(charID, adict, visited):
     charac = Character(charID)
     visited.append(charID)
-    graph_db.create(node(name=charac.name()))
+    this_node = graph_db.get_or_create_indexed_node("Character5",'ID',charID)
+    for friendID in charac.friendIDs():
+        friend_node = graph_db.get_or_create_indexed_node("Character5",'ID',friendID)
+        if not list(graph_db.match(start_node=this_node, end_node=friend_node,bidirectional=True)):   
+            link = neo4j.Path(this_node,"friends",friend_node)
+            link.get_or_create(graph_db)
     for friendID in charac.friendIDs():
         if friendID not in visited:
-            build_graph_neo(friendID, adict, visited)
-    return None
+            build_graph_neo3(friendID, adict, visited)
+    return adict
     
 '''
 def build_graph_concepts(charID, adict, visited):
