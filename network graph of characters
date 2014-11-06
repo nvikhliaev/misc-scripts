@@ -1,7 +1,8 @@
 import requests
 import sys
 from py2neo import neo4j,node, rel
-
+import time
+import json
 
 graph_db = neo4j.GraphDatabaseService("http://localhost:7474/db/data/")
 
@@ -115,13 +116,25 @@ def build_graph(charID, adict, visited):
             build_graph(friendID, adict, visited)
     return adict
 
+nodes ={}
+nodes_list=[]
+edges={}
+edges_list=[]
+
+def build_json_nodes(graph):
+    keys = graph.keys()
+    for key in keys:
+        nodes_list.append({'size':1, 'id':key, 'label':key})
+    for key in keys:
+        for friend in graph[key]:
+            edges_list.append({'id':friend, 'source':key, 'target':friend})
     
 def build_graph_neo3(charID, adict, visited):
     charac = Character(charID)
     visited.append(charID)
-    this_node = graph_db.get_or_create_indexed_node("Character5",'ID',charID)
+    this_node = graph_db.get_or_create_indexed_node("Characters",'ID',charID,{'name':charac.name()})
     for friendID in charac.friendIDs():
-        friend_node = graph_db.get_or_create_indexed_node("Character5",'ID',friendID)
+        friend_node = graph_db.get_or_create_indexed_node("Characters",'ID',friendID)
         if not list(graph_db.match(start_node=this_node, end_node=friend_node,bidirectional=True)):   
             link = neo4j.Path(this_node,"friends",friend_node)
             link.get_or_create(graph_db)
@@ -130,16 +143,16 @@ def build_graph_neo3(charID, adict, visited):
             build_graph_neo3(friendID, adict, visited)
     return adict
     
+def build_neo(i):
+    while i<50:
+        charac = Character(i)
+        if not charac.data:
+            pass
+        else:
+            graph_db.get_or_create_indexed_node("Characters",'ID',i,{'name':charac.name()})
+        if i%300 ==0:
+            time.sleep(900)
+        i+=1
 '''
-def build_graph_concepts(charID, adict, visited):
-    visited.append(charID)
-    adict[charID] = Character(charID).conceptIDs()
-    for conceptID in adict[charID]:
-        if conceptID not in visited:
-            adict[conceptID]= Concept(conceptID).characterIDs()
-            visited.append(conceptID)
-            for friendID in adict[conceptID]:  
-                if friendID not in visited:
-                    build_graph_concepts(friendID, adict, visited)
-    return adict
-'''
+with open("data.json", "w") as outfile:
+    json.dump({'nodes':nodes_list, 'edges':edges_list}, outfile, indent=4)'''
