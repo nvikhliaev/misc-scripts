@@ -86,7 +86,7 @@ class Concept:
             for character in self.data['characters']:
                 characterIDs_list.append(character['id'])
             return characterIDs_list
-
+'''
 # The bfs function code is attributed to qiao @stackexchange
 def bfs(graph, start, end):
     # maintain a queue of paths
@@ -106,30 +106,51 @@ def bfs(graph, start, end):
             new_path = list(path)
             new_path.append(adjacent)
             queue.append(new_path)
+'''
 
-def build_graph(charID, adict, visited):
+def build_graph_names(charID, adict, visited):
     charac = Character(charID)
     visited.append(charID)
     adict[charac.name()] = charac.friends()
     for friendID in charac.friendIDs():
         if friendID not in visited:
-            build_graph(friendID, adict, visited)
+            build_graph_names(friendID, adict, visited)
+    return adict
+    
+def build_graph_IDs(charID, adict, visited):
+    charac = Character(charID)
+    visited.append(charID)
+    adict[charID] = charac.friendIDs()
+    for friendID in charac.friendIDs():
+        if friendID not in visited:
+            build_graph_IDs(friendID, adict, visited)
     return adict
 
-nodes ={}
-nodes_list=[]
-edges={}
-edges_list=[]
+def connected(graph, A, B):
+    if not graph:
+        return False
+    for edge in graph:
+        if ((edge['source']==A) and (edge['target']==B)) or ((edge['source']==B) and (edge['target']==A)):
+            return True
+    return False
+
 
 def build_json_nodes(graph):
+    nodes_list=[]
+    edges_list=[]
+    i=0
     keys = graph.keys()
     for key in keys:
-        nodes_list.append({'size':1, 'id':key, 'label':key})
+        nodes_list.append({'size':1, 'id':str(key), 'label':str(key)})
     for key in keys:
         for friend in graph[key]:
-            edges_list.append({'id':friend, 'source':key, 'target':friend})
+            if not connected(edges_list,str(key),str(friend)):
+                edges_list.append({'id':str(i), 'source':str(key), 'target':str(friend)})
+                i+=1
+    with open("data.json",  mode="w") as outfile:
+        json.dump({'nodes':nodes_list, 'edges':edges_list}, outfile, indent=4)
     
-def build_graph_neo3(charID, adict, visited):
+def build_graph_neo(charID, adict, visited):
     charac = Character(charID)
     visited.append(charID)
     this_node = graph_db.get_or_create_indexed_node("Characters",'ID',charID,{'name':charac.name()})
@@ -140,7 +161,7 @@ def build_graph_neo3(charID, adict, visited):
             link.get_or_create(graph_db)
     for friendID in charac.friendIDs():
         if friendID not in visited:
-            build_graph_neo3(friendID, adict, visited)
+            build_graph_neo(friendID, adict, visited)
     return adict
     
 def build_neo(i):
@@ -153,6 +174,4 @@ def build_neo(i):
         if i%300 ==0:
             time.sleep(900)
         i+=1
-'''
-with open("data.json", "w") as outfile:
-    json.dump({'nodes':nodes_list, 'edges':edges_list}, outfile, indent=4)'''
+
