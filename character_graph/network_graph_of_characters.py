@@ -4,9 +4,6 @@ from py2neo import neo4j,node, rel
 import time
 import json
 
-graph_db = neo4j.GraphDatabaseService("http://localhost:7474/db/data/")
-
-
 url= "http://www.giantbomb.com/api/character/3005-"
 url2 = "/?api_key=ce6972cdd7d9f713817345a0256f6bd645629481&format=json"
 url3 = "http://www.giantbomb.com/api/concept/3015-"
@@ -86,27 +83,6 @@ class Concept:
             for character in self.data['characters']:
                 characterIDs_list.append(character['id'])
             return characterIDs_list
-'''
-# The bfs function code is attributed to qiao @stackexchange
-def bfs(graph, start, end):
-    # maintain a queue of paths
-    queue = []
-    # push the first path into the queue
-    queue.append([start])
-    while queue:
-        # get the first path from the queue
-        path = queue.pop(0)
-        # get the last node from the path
-        node = path[-1]
-        # path found
-        if node == end:
-            return path
-        # enumerate all adjacent nodes, construct a new path and push it into the queue
-        for adjacent in graph.get(node, []):
-            new_path = list(path)
-            new_path.append(adjacent)
-            queue.append(new_path)
-'''
 
 def build_graph_names(charID, adict, visited):
     charac = Character(charID)
@@ -134,7 +110,6 @@ def connected(graph, A, B):
             return True
     return False
 
-
 def build_json_nodes(graph):
     nodes_list=[]
     edges_list=[]
@@ -149,7 +124,15 @@ def build_json_nodes(graph):
                 i+=1
     with open("data.json",  mode="w") as outfile:
         json.dump({'nodes':nodes_list, 'edges':edges_list}, outfile, indent=4)
-    
+ 
+
+
+#The code below is experimental and pertains only to when a local instance of neo4j is running.
+#neo4j is an open source database for storing graph-based data. The variable graph_db references the local
+#neo4j instance. The function build_graph_neo will take a character ID and load their network of friends
+#into the local neo4j database.
+graph_db = neo4j.GraphDatabaseService("http://localhost:7474/db/data/")
+  
 def build_graph_neo(charID, adict, visited):
     charac = Character(charID)
     visited.append(charID)
@@ -164,6 +147,7 @@ def build_graph_neo(charID, adict, visited):
             build_graph_neo(friendID, adict, visited)
     return adict
     
+#build_neo will load the first 50 characters into the local neo4j instance as nodes.
 def build_neo(i):
     while i<50:
         charac = Character(i)
